@@ -1,0 +1,166 @@
+/* ==========================================================================
+   盲派八字排盘分析 - 基础样式与五行色彩系统
+   ========================================================================== */
+
+:root {
+  --bg-dark: #0a0e14;
+  --bg-card: #131a24;
+  --bg-card-hover: #1b2533;
+  --bg-panel: #161e2b;
+  --border-color: #263346;
+  --border-light: #364860;
+  
+  --text-primary: #f0f4f8;
+  --text-secondary: #9cb0c6;
+  --text-muted: #5f758f;
+  
+  --accent-gold: #e5b558;
+  --accent-gold-glow: rgba(229, 181, 88, 0.35);
+  
+  /* 五行色彩 */
+  --wx-mu: #2ecc71;    /* 木 翠绿 */
+  --wx-huo: #e74c3c;   /* 火 炽红 */
+  --wx-tu: #d4ac0d;    /* 土 琥珀黄 */
+  --wx-jin: #ffffff;   /* 金 纯白/银白 */
+  --wx-shui: #3498db;  /* 水 湛蓝 */
+
+  /* 关系色彩 */
+  --rel-he: #2ecc71;     /* 合: 翠绿 */
+  --rel-chong: #e74c3c;  /* 冲: 亮红 */
+  --rel-xing: #e67e22;   /* 刑: 橙褐 */
+  --rel-chuan: #9b59b6;  /* 穿: 秘紫 */
+  --rel-po: #7f8c8d;     /* 破: 铁灰 */
+  --rel-anhe: #00bcd4;   /* 暗合: 蓝青 */
+  --rel-gen: #1abc9c;    /* 通根透干: 青 */
+  --rel-ke: #f39c12;     /* 克: 琥珀金 */
+  --rel-zihe: #e5b558;   /* 干支自合: 纯金 */
+
+  /* 字体系统 */
+  --font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  --font-kai: "STKaiti", "KaiTi", "BiauKai", serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 五行徽标与文字颜色 (支持中文与拼音类名) */
+.wx-木, .wx-mu   { color: var(--wx-mu) !important; }
+.wx-火, .wx-huo  { color: var(--wx-huo) !important; }
+.wx-土, .wx-tu   { color: var(--wx-tu) !important; }
+.wx-金, .wx-jin  { color: var(--wx-jin) !important; text-shadow: 0 0 6px rgba(255, 255, 255, 0.4); }
+.wx-水, .wx-shui { color: var(--wx-shui) !important; }
+
+.bg-wx-木, .bg-wx-mu   { background-color: rgba(46, 204, 113, 0.15) !important; border-color: var(--wx-mu) !important; }
+.bg-wx-火, .bg-wx-huo  { background-color: rgba(231, 76, 60, 0.15) !important; border-color: var(--wx-huo) !important; }
+.bg-wx-土, .bg-wx-tu   { background-color: rgba(212, 172, 13, 0.15) !important; border-color: var(--wx-tu) !important; }
+.bg-wx-金, .bg-wx-jin  { background-color: rgba(255, 255, 255, 0.12) !important; border-color: rgba(255, 255, 255, 0.8) !important; }
+.bg-wx-水, .bg-wx-shui { background-color: rgba(52, 152, 219, 0.15) !important; border-color: var(--wx-shui) !important; }
+
+/* 按钮通用 */
+button, select, input {
+  font-family: inherit;
+  color: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+  transition: var(--transition);
+  user-select: none;
+}
+
+.btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-gold);
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d4ac0d, #f39c12);
+  color: #111;
+  font-weight: bold;
+  border: none;
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.25);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #e5b558, #f5b041);
+  box-shadow: 0 6px 16px rgba(243, 156, 18, 0.4);
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+.btn.active {
+  background: var(--accent-gold);
+  color: #111;
+  border-color: var(--accent-gold);
+  font-weight: bold;
+}
+
+/* 标签 Badge */
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-guest {
+  background: rgba(100, 116, 139, 0.2);
+  color: #94a3b8;
+  border: 1px solid #475569;
+}
+
+.badge-host {
+  background: rgba(229, 181, 88, 0.15);
+  color: var(--accent-gold);
+  border: 1px solid var(--accent-gold);
+}
+
+/* 滚动条定制 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

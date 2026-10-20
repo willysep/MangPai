@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>盲派八字 · 排盘与干支作用分析工具</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- 顶部标题栏 -->
+    <header class="header-bar">
+      <div class="brand-title">
+        <h1>盲派八字 · 干支作用分析系统</h1>
+      </div>
+      <div class="header-actions">
+        <button id="btn-replay" class="btn" title="重播四柱与关系连线动画">
+          <span>🔄 重播动效</span>
+        </button>
+        <div class="speed-control-group">
+          <span class="speed-label">速度:</span>
+          <!-- 桌面端速度按钮组 -->
+          <div class="speed-btns-wrapper">
+            <button class="btn btn-sm speed-btn" data-speed="0.5">0.5×</button>
+            <button class="btn btn-sm speed-btn active" data-speed="1.0">1.0×</button>
+            <button class="btn btn-sm speed-btn" data-speed="2.0">2.0×</button>
+          </div>
+          <!-- 移动端速度下拉选择器 -->
+          <select id="speed-select-mobile" class="speed-select-mobile" aria-label="动画速度选择">
+            <option value="0.5">0.5×</option>
+            <option value="1.0" selected>1.0×</option>
+            <option value="2.0">2.0×</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- 控制与输入面板 -->
+    <section class="control-panel">
+      <!-- 8 下拉 + 快速文本输入 -->
+      <div class="input-row">
+        <!-- 四柱下拉网格 (移动端4列2行紧凑呈现) -->
+        <div class="pillars-input-grid">
+          <!-- 年柱 -->
+          <div class="input-group pillar-input-group">
+            <span class="input-label pillar-input-label">年柱:</span>
+            <div class="select-pillar">
+              <select id="s-year-stem" title="年干"></select>
+              <select id="s-year-branch" title="年支"></select>
+            </div>
+          </div>
+          <!-- 月柱 -->
+          <div class="input-group pillar-input-group">
+            <span class="input-label pillar-input-label">月柱:</span>
+            <div class="select-pillar">
+              <select id="s-month-stem" title="月干"></select>
+              <select id="s-month-branch" title="月支"></select>
+            </div>
+          </div>
+          <!-- 日柱 -->
+          <div class="input-group pillar-input-group">
+            <span class="input-label pillar-input-label day-pillar-label" style="color:var(--accent-gold);font-weight:bold;">日柱:</span>
+            <div class="select-pillar day-pillar-box" style="border-color:var(--accent-gold);">
+              <select id="s-day-stem" title="日干(日主)"></select>
+              <select id="s-day-branch" title="日支(配偶宫)"></select>
+            </div>
+          </div>
+          <!-- 时柱 -->
+          <div class="input-group pillar-input-group">
+            <span class="input-label pillar-input-label">时柱:</span>
+            <div class="select-pillar">
+              <select id="s-hour-stem" title="时干"></select>
+              <select id="s-hour-branch" title="时支"></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 辅助输入与分析操作区 -->
+        <div class="options-input-group">
+          <!-- 快速文本框 -->
+          <div class="input-group quick-input-item">
+            <span class="input-label">或快速文本:</span>
+            <input type="text" id="quick-input" class="text-input" placeholder="例如：甲子 丙寅 戊辰 庚申">
+          </div>
+
+          <!-- 性别 -->
+          <div class="input-group">
+            <span class="input-label">性别:</span>
+            <div class="gender-toggle">
+              <button class="gender-btn active" data-gender="男">男命</button>
+              <button class="gender-btn" data-gender="女">女命</button>
+            </div>
+          </div>
+
+          <!-- 出生年份候选 -->
+          <div class="input-group">
+            <span class="input-label">公元年:</span>
+            <select id="birth-year-select" class="select-std"></select>
+          </div>
+
+          <!-- 起运岁数 -->
+          <div class="input-group">
+            <span class="input-label" title="传统大运起始岁数，因无公历日期故需手动录入">起运岁:</span>
+            <input type="number" id="qiyun-input" class="number-input" min="1" max="10" value="1">
+          </div>
+
+          <button id="btn-analyze" class="btn btn-primary">
+            <span>⚡ 开始排盘</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 错误警告横幅 -->
+      <div id="error-banner" class="error-banner"></div>
+    </section>
+
+    <!-- 主工作区：四柱动图与右侧五行/盲派分析 -->
+    <main class="main-workspace">
+      <!-- 左栏：主图 (四柱 + 大运 + 流年 + 交互弧线) -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-title">
+            <span>原局四柱与运岁动态作用图</span>
+            <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">(悬停弧线或字根高亮查看盲派作用机制)</span>
+          </div>
+          <div class="chart-legend-mini">
+            <span class="legend-group-tag">天干</span>
+            <span title="天干五合 (甲己、乙庚、丙辛、丁壬、戊癸)"><span class="legend-dot" style="background:var(--rel-he);"></span>五合</span>
+            <span title="天干相冲 (甲庚、乙辛、丙壬、丁癸)"><span class="legend-dot" style="background:var(--rel-chong);"></span>相冲</span>
+            <span title="天干相克 (强弱攻伐制约)"><span class="legend-dot" style="background:var(--rel-ke);"></span>相克</span>
+            <span class="legend-sep"></span>
+            <span class="legend-group-tag">地支</span>
+            <span title="地支六合、半合、拱合"><span class="legend-dot" style="background:var(--rel-he);"></span>六合/半合</span>
+            <span title="三合局 (申子辰等)、三会局 (寅卯辰等) 三柱骨干联动"><span class="legend-dot" style="background:var(--rel-he);box-shadow:0 0 5px var(--accent-gold);"></span>三合/三会</span>
+            <span title="地支六冲 (子午、丑未、寅申、卯酉、辰戌、巳亥)"><span class="legend-dot" style="background:var(--rel-chong);"></span>六冲</span>
+            <span title="地支六穿/害 (盲派核心煞：子未、丑午、寅巳、卯辰、申亥、酉戌)"><span class="legend-dot" style="background:var(--rel-chuan);"></span>六穿(害)</span>
+            <span title="地支相刑 (三刑、相刑、自刑)"><span class="legend-dot" style="background:var(--rel-xing);"></span>相刑</span>
+            <span title="地支藏干暗合 (通禄暗合、余气暗通)"><span class="legend-dot" style="background:var(--rel-anhe);"></span>暗合</span>
+            <span title="地支六破 (气机破耗暗损)"><span class="legend-dot" style="background:var(--rel-po);"></span>六破</span>
+            <span class="legend-sep"></span>
+            <span title="同柱干支天地自合 (丁亥、戊子、辛巳、壬午等)"><span class="legend-dot" style="background:var(--rel-zihe);"></span>干支自合</span>
+          </div>
+        </div>
+
+        <!-- 舞台容器 (支持多柱横向滑动与自适应缩放) -->
+        <div class="bazi-stage">
+          <div class="stage-scroll-hint">⟷ 左右滑动查看全柱</div>
+          <div class="bazi-stage-track">
+            <svg id="stage-svg" class="stage-svg-layer"></svg>
+            <div id="pillars-container" class="pillars-container"></div>
+            <div id="chart-tooltip" class="chart-tooltip"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右栏：五行雷达与盲派特色分析 -->
+      <aside class="side-panels">
+        <!-- 移动端专属：五行力量卡片折叠/展开按钮 -->
+        <button id="btn-toggle-wuxing" class="btn btn-toggle-wuxing" type="button" aria-expanded="false">
+          <span class="toggle-left">
+            <span class="toggle-icon">📊</span>
+            <span class="toggle-title">五行力量 · 生克流通</span>
+          </span>
+          <span class="toggle-right">
+            <span class="toggle-state-text">展开</span>
+            <span class="toggle-arrow">▼</span>
+          </span>
+        </button>
+
+        <!-- 五行生克面板 -->
+        <div id="wuxing-card" class="panel-card wuxing-panel-card">
+          <div class="panel-card-title">
+            <span>五行力量 · 生克流通</span>
+            <span style="font-size:0.75rem;color:var(--text-secondary);">外生内克 · 权重统计</span>
+          </div>
+          <div class="wuxing-chart-container">
+            <div id="wuxing-svg-wrap" class="wuxing-svg-wrap"></div>
+            <div id="wuxing-bars" class="wuxing-bars"></div>
+          </div>
+        </div>
+
+        <!-- 盲派做功与特色分析面板 -->
+        <div class="panel-card">
+          <div id="mp-panel-content"></div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- 关系过滤器条 (柱位与干支筛选、关系分类开关) -->
+    <section id="filter-tray" class="filter-tray"></section>
+
+    <!-- 底部时间轴：大运与流年 -->
+    <section class="timeline-section">
+      <div class="timeline-title">
+        <span>✦ 十步大运走势</span>
+        <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:normal;">(点击某步大运可将其作为外来柱载入上方主图，并展开下方对应流年)</span>
+      </div>
+      <div id="dayun-timeline" class="timeline-scroll"></div>
+
+      <div class="timeline-title" style="margin-top:6px;">
+        <span>✦ 对应十年流年</span>
+        <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:normal;">(点击某一年份可将该流年太岁挂载至主图共同分析)</span>
+      </div>
+      <div id="liunian-timeline" class="timeline-scroll"></div>
+    </section>
+
+    <!-- 底部详表：藏干与十神全景表 -->
+    <section class="detail-table-card">
+      <div class="panel-card-title">
+        <span>四柱十神 · 藏干气别 · 体用属性全览</span>
+      </div>
+      <div id="detail-table-content"></div>
+    </section>
+  </div>
+
+  <!-- 干支作用深度解析交互弹窗 -->
+  <div id="relation-modal" class="relation-modal-backdrop" style="display:none;">
+    <div class="relation-modal-dialog">
+      <button id="modal-close-btn" class="modal-close-btn" title="关闭 (Esc)">&times;</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- 纯原生脚本载入 (按依赖次序引入，无需打包、无需服务器) -->
+  <script src="js/ns.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/engine/core.js"></script>
+  <script src="js/engine/relations.js"></script>
+  <script src="js/engine/wuxing.js"></script>
+  <script src="js/engine/mangpai.js"></script>
+  <script src="js/engine/luck.js"></script>
+  <script src="js/render/svg.js"></script>
+  <script src="js/render/pillars.js"></script>
+  <script src="js/render/relations.js"></script>
+  <script src="js/render/wuxing.js"></script>
+  <script src="js/render/panels.js"></script>
+  <script src="js/render/luck.js"></script>
+  <script src="js/render/modal.js"></script>
+  <script src="js/animator.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

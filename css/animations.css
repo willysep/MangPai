@@ -1,0 +1,399 @@
+/* ==========================================================================
+   盲派八字排盘分析 - 动画与动态特效系统
+   ========================================================================== */
+
+/* 1. 关系连线/折线绘制动画 */
+.relation-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.3s ease, stroke-width 0.2s ease, opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.relation-path:hover {
+  stroke-width: 4.5px !important;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.relation-path.highlighted {
+  stroke-width: 5px !important;
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+.relation-path.dimmed {
+  opacity: 0.15 !important;
+}
+
+/* ==========================================================================
+   2.1 天干专属动态特效 (Heavenly Stems · Celestial Realm)
+   - 气纯、行于上、快、灵动轻盈、极光、闪电、控制光束
+   ========================================================================== */
+
+/* 天干五合: 灵动极光天河 · 阴阳磁吸 */
+.rel-tiangan-he {
+  stroke-width: 2.6px;
+  stroke-dasharray: 14px 6px;
+}
+.rel-tiangan-he.rel-flow-active {
+  stroke-width: 2.8px !important;
+  stroke-dasharray: 14px 6px !important;
+  animation: tianganAuroraFlow calc(1.2s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 6px rgba(46, 204, 113, 0.9)) drop-shadow(0 0 12px rgba(46, 204, 113, 0.45));
+}
+@keyframes tianganAuroraFlow {
+  from { stroke-dashoffset: 40px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* 天干相冲: 九天雷霆霹雳 · 高频闪电破空 */
+.rel-tiangan-chong {
+  stroke-width: 2.8px;
+  stroke-dasharray: 6px 3px 2px 3px;
+}
+.rel-tiangan-chong.rel-flow-active {
+  stroke-width: 3.2px !important;
+  stroke-dasharray: 6px 3px 2px 3px !important;
+  animation: tianganLightningFlash calc(0.3s / var(--anim-speed-factor, 0.5)) steps(3) infinite alternate !important;
+  filter: drop-shadow(0 0 8px rgba(255, 71, 87, 1)) drop-shadow(0 0 16px rgba(255, 71, 87, 0.6));
+}
+@keyframes tianganLightningFlash {
+  0% { stroke-dashoffset: 0px; opacity: 0.85; stroke-width: 2.8px; }
+  50% { stroke-dashoffset: 14px; opacity: 1; stroke-width: 3.8px; }
+  100% { stroke-dashoffset: 28px; opacity: 0.9; stroke-width: 3.2px; }
+}
+
+/* 天干相克: 太阳神曜光束 · 金辉定势攻伐 */
+.rel-tiangan-ke {
+  stroke-width: 2.4px;
+  stroke-dasharray: 12px 4px;
+}
+.rel-tiangan-ke.rel-flow-active {
+  stroke-width: 2.6px !important;
+  stroke-dasharray: 12px 4px !important;
+  animation: tianganSolarRay calc(0.75s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 6px rgba(243, 156, 18, 0.85));
+}
+@keyframes tianganSolarRay {
+  from { stroke-dashoffset: 32px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* ==========================================================================
+   2.2 地支专属动态特效 (Earthly Branches · Terrestrial / Subterranean Realm)
+   - 气厚、藏干重滞、地壳撞击、岩浆撕裂、暗流水涌
+   ========================================================================== */
+
+/* 地支六合: 地质板块稳固交融 · 引力沉锁 */
+.rel-dizhi-he {
+  stroke-width: 3px;
+  stroke-dasharray: 18px 6px;
+}
+.rel-dizhi-he.rel-flow-active {
+  stroke-width: 3.4px !important;
+  stroke-dasharray: 18px 6px !important;
+  animation: dizhiTectonicHe calc(1.5s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 7px rgba(46, 204, 113, 0.85));
+}
+@keyframes dizhiTectonicHe {
+  from { stroke-dashoffset: 48px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* 地支六冲: 地脉烈性地震 · 岩浆震荡对冲 */
+.rel-dizhi-chong {
+  stroke-width: 3.2px;
+  stroke-dasharray: 10px 5px;
+}
+.rel-dizhi-chong.rel-flow-active {
+  stroke-width: 3.6px !important;
+  stroke-dasharray: 10px 5px !important;
+  animation: dizhiSeismicChong calc(0.5s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 9px rgba(231, 76, 60, 0.95)) drop-shadow(0 0 18px rgba(231, 76, 60, 0.5));
+}
+@keyframes dizhiSeismicChong {
+  from { stroke-dashoffset: 30px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* 地支六穿 (盲派核心煞): 地脉深部暗刺撕裂 · 毒素穿透 */
+.rel-dizhi-chuan {
+  stroke-width: 3.2px;
+  stroke-dasharray: 14px 4px;
+  stroke: var(--rel-chuan) !important;
+}
+.rel-dizhi-chuan.rel-flow-active {
+  stroke-width: 3.6px !important;
+  stroke-dasharray: 14px 4px !important;
+  stroke: var(--rel-chuan) !important;
+  animation: dizhiPierceChuan calc(0.7s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 9px rgba(155, 89, 182, 0.95)) drop-shadow(0 0 18px rgba(155, 89, 182, 0.6));
+}
+@keyframes dizhiPierceChuan {
+  from { stroke-dashoffset: 36px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* 地支相刑: 地壳断层绞磨 · 机械式巨石研磨 */
+.rel-dizhi-xing {
+  stroke-width: 2.8px;
+  stroke-dasharray: 9px 4px 3px 4px;
+}
+.rel-dizhi-xing.rel-flow-active {
+  stroke-width: 3px !important;
+  stroke-dasharray: 9px 4px 3px 4px !important;
+  animation: dizhiGrindXing calc(1.1s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 6px rgba(230, 126, 34, 0.85));
+}
+@keyframes dizhiGrindXing {
+  from { stroke-dashoffset: 38px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* 地支暗合: 幽深潜龙地泉 · 水文暗涌流淌 */
+.rel-dizhi-anhe {
+  stroke-width: 2.4px;
+  stroke-dasharray: 6px 5px;
+}
+.rel-dizhi-anhe.rel-flow-active {
+  stroke-width: 2.6px !important;
+  stroke-dasharray: 6px 5px !important;
+  animation: dizhiAquiferAnhe calc(1.4s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 6px rgba(0, 188, 212, 0.85));
+}
+@keyframes dizhiAquiferAnhe {
+  from { stroke-dashoffset: 22px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* 地支六破: 脆性内耗暗裂 · 晶格微震裂痕 */
+.rel-dizhi-po {
+  stroke-width: 2px;
+  stroke-dasharray: 4px 6px;
+  opacity: 0.85;
+}
+.rel-dizhi-po.rel-flow-active {
+  stroke-width: 2.2px !important;
+  stroke-dasharray: 4px 6px !important;
+  animation: dizhiFissurePo calc(1.8s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 5px rgba(127, 140, 141, 0.7));
+}
+@keyframes dizhiFissurePo {
+  from { stroke-dashoffset: 20px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* 通根透干: 木本水源 · 自下而上生生引动 */
+.rel-type-gen {
+  stroke-width: 1.8px;
+  stroke-dasharray: 7px 4px;
+  opacity: 0.75;
+}
+.rel-type-gen.rel-flow-active {
+  stroke-width: 2px !important;
+  stroke-dasharray: 7px 4px !important;
+  animation: relFlowGen calc(1.5s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 4px rgba(26, 188, 156, 0.7));
+}
+@keyframes relFlowGen {
+  from { stroke-dashoffset: 22px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* 干支自合: 同柱天地自合 · 垂直金柱贯通 */
+.rel-type-zihe.rel-flow-active {
+  stroke-width: 3.2px !important;
+  stroke-dasharray: 8px 4px !important;
+  animation: zihePillarFlow calc(1.0s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 8px rgba(229, 181, 88, 0.9));
+}
+@keyframes zihePillarFlow {
+  from { stroke-dashoffset: 24px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* ==========================================================================
+   2.3 三serangkai 专属 (三合局 & 三会局 - Triad Formations)
+   - 三柱联动、三叉总线、三核共振巡航、徽章光环
+   ========================================================================== */
+
+/* 三合局 (Triad Harmony): 申子辰, 亥卯未, 寅午戌, 巳酉丑 —— 三位一体黄金共振 */
+.rel-triad-sanhe {
+  stroke-width: 3.5px;
+  stroke-dasharray: 20px 8px;
+}
+.rel-triad-sanhe.rel-flow-active {
+  stroke-width: 3.8px !important;
+  stroke-dasharray: 20px 8px !important;
+  animation: triadSanheFlow calc(1.6s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 9px rgba(46, 204, 113, 0.9)) drop-shadow(0 0 18px rgba(46, 204, 113, 0.6)) !important;
+}
+@keyframes triadSanheFlow {
+  from { stroke-dashoffset: 56px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* 三会局 (Triad Meeting): 寅卯辰, 巳午未, 申酉戌, 亥子丑 —— 一方霸气领地 */
+.rel-triad-sanhui {
+  stroke-width: 3.8px;
+  stroke-dasharray: 24px 6px;
+}
+.rel-triad-sanhui.rel-flow-active {
+  stroke-width: 4.2px !important;
+  stroke-dasharray: 24px 6px !important;
+  animation: triadSanhuiFlow calc(1.4s / var(--anim-speed-factor, 0.5)) linear infinite !important;
+  filter: drop-shadow(0 0 10px rgba(39, 174, 96, 0.95)) drop-shadow(0 0 20px rgba(39, 174, 96, 0.6)) !important;
+}
+@keyframes triadSanhuiFlow {
+  from { stroke-dashoffset: 60px; }
+  to { stroke-dashoffset: 0px; }
+}
+
+/* 3 Serangkai 核心中枢徽章 */
+.triad-nexus-group {
+  cursor: pointer;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+.triad-nexus-group:hover {
+  filter: drop-shadow(0 0 10px var(--accent-gold));
+}
+.triad-nexus-badge {
+  font-size: 0.72rem;
+  font-family: var(--font-family);
+  font-weight: bold;
+  fill: #ffffff;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.triad-badge-bg {
+  fill: #0d121a;
+  stroke: var(--accent-gold);
+  stroke-width: 1.5px;
+  rx: 6px;
+  ry: 6px;
+}
+
+/* 飞驰能量光弹/光斑 (Travelling Photons) */
+.rel-photon {
+  pointer-events: none;
+  opacity: 0.95;
+  transition: opacity 0.3s ease;
+}
+
+.rel-photon.dimmed {
+  opacity: 0.1 !important;
+}
+
+.rel-photon.highlighted ellipse,
+.rel-photon.highlighted circle {
+  filter: drop-shadow(0 0 14px currentColor) !important;
+}
+
+/* 3. 日主核心节点呼吸脉冲动效 */
+.day-master-node {
+  border-color: var(--accent-gold) !important;
+  box-shadow: 0 0 14px var(--accent-gold-glow);
+  animation: dayMasterPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes dayMasterPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px var(--accent-gold-glow);
+    border-color: var(--accent-gold);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(229, 181, 88, 0.85), 0 0 6px #fff;
+    border-color: #ffd875;
+  }
+}
+
+/* 4. 卡片出场序列动画 */
+.card-animate-in {
+  opacity: 0;
+  transform: translateY(22px);
+  animation: cardEntrance 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 5. 藏干展开/弹出动画 */
+.hidden-stems-tray .hidden-item {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: hiddenFadeIn 0.35s ease-out forwards;
+}
+
+@keyframes hiddenFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 6. 五行流动光环与圆环粒子 */
+.wuxing-cycle-line {
+  stroke-dasharray: 6 6;
+  animation: flowRotate 2.2s linear infinite;
+}
+
+.wuxing-ke-line {
+  stroke-dasharray: 4 4;
+  animation: flowRotateReverse 3.2s linear infinite;
+}
+
+.wuxing-day-ring {
+  stroke-dasharray: 6 3;
+  animation: flowRotate 3s linear infinite;
+}
+
+@keyframes flowRotate {
+  from {
+    stroke-dashoffset: 48px;
+  }
+  to {
+    stroke-dashoffset: 0px;
+  }
+}
+
+@keyframes flowRotateReverse {
+  from {
+    stroke-dashoffset: 0px;
+  }
+  to {
+    stroke-dashoffset: 40px;
+  }
+}
+
+/* 7. 弹窗淡入与缩放上浮动效 */
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 8. 柔和适配无障碍设定 (避免全屏暴力截断所有动画) */
+@media (prefers-reduced-motion: reduce) {
+  .card-animate-in,
+  .hidden-stems-tray .hidden-item {
+    transform: none !important;
+  }
+}

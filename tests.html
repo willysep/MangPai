@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>盲派八字引擎 - 自动化单元测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #11141a;
+      color: #e0e6ed;
+      padding: 24px;
+      line-height: 1.6;
+    }
+    h1 { color: #f39c12; margin-bottom: 8px; }
+    .subtitle { color: #8892b0; margin-bottom: 24px; }
+    .test-suite {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .test-suite h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      color: #63b3ed;
+      border-bottom: 1px solid #2d3748;
+      padding-bottom: 8px;
+    }
+    .test-item {
+      padding: 4px 0;
+      font-family: monospace;
+      font-size: 0.95rem;
+    }
+    .pass { color: #48bb78; }
+    .fail { color: #f56565; font-weight: bold; }
+    .summary {
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 24px;
+    }
+    .summary.all-pass { background: #22543d; color: #9ae6b4; }
+    .summary.has-fail { background: #742a2a; color: #feb2b2; }
+  </style>
+</head>
+<body>
+  <h1>盲派八字排盘分析引擎 — 单元测试运行器</h1>
+  <div class="subtitle">无需任何本地服务器，支持浏览器直接 file:// 协议运行测试</div>
+
+  <div id="results"></div>
+  <div id="summary"></div>
+
+  <!-- 引入引擎基础文件 (标准 script 标签) -->
+  <script src="js/ns.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/engine/core.js"></script>
+  <script src="js/engine/relations.js"></script>
+  <script src="js/engine/wuxing.js"></script>
+  <script src="js/engine/mangpai.js"></script>
+  <script src="js/engine/luck.js"></script>
+
+  <script>
+    (function() {
+      const container = document.getElementById('results');
+      let passed = 0;
+      let failed = 0;
+      let currentSuiteDiv = null;
+
+      function suite(name) {
+        currentSuiteDiv = document.createElement('div');
+        currentSuiteDiv.className = 'test-suite';
+        const h2 = document.createElement('h2');
+        h2.textContent = name;
+        currentSuiteDiv.appendChild(h2);
+        container.appendChild(currentSuiteDiv);
+      }
+
+      function assert(condition, message) {
+        const item = document.createElement('div');
+        item.className = 'test-item ' + (condition ? 'pass' : 'fail');
+        item.textContent = (condition ? '✓ ' : '✗ FAIL: ') + message;
+        currentSuiteDiv.appendChild(item);
+        if (condition) passed++; else failed++;
+      }
+
+      function assertEqual(actual, expected, message) {
+        const ok = (actual === expected);
+        const item = document.createElement('div');
+        item.className = 'test-item ' + (ok ? 'pass' : 'fail');
+        item.textContent = (ok ? '✓ ' : '✗ FAIL: ') + message + (ok ? ` [${actual}]` : ` (预期: ${expected}, 实际: ${actual})`);
+        currentSuiteDiv.appendChild(item);
+        if (ok) passed++; else failed++;
+      }
+
+      // 执行测试
+      suite('1. 十神算法测试');
+      const core = MP.engine.core;
+      assertEqual(core.getTenGod('甲', '甲'), '比肩', '甲见甲');
+      assertEqual(core.getTenGod('甲', '乙'), '劫财', '甲见乙');
+      assertEqual(core.getTenGod('甲', '丙'), '食神', '甲见丙');
+      assertEqual(core.getTenGod('甲', '丁'), '伤官', '甲见丁');
+      assertEqual(core.getTenGod('甲', '戊'), '偏财', '甲见戊');
+      assertEqual(core.getTenGod('甲', '己'), '正财', '甲见己');
+      assertEqual(core.getTenGod('甲', '庚'), '七杀', '甲见庚');
+      assertEqual(core.getTenGod('甲', '辛'), '正官', '甲见辛');
+      assertEqual(core.getTenGod('甲', '壬'), '偏印', '甲见壬');
+      assertEqual(core.getTenGod('甲', '癸'), '正印', '甲见癸');
+      assertEqual(core.getTenGod('辛', '丙'), '正官', '辛见丙');
+      assertEqual(core.getTenGod('辛', '丁'), '七杀', '辛见丁');
+
+      suite('2. 六十甲子合法性验证');
+      assert(core.isValidJiazi('甲', '子'), '甲子合法');
+      assert(!core.isValidJiazi('甲', '丑'), '甲丑非法 (阴阳不配)');
+      assert(core.isValidJiazi('乙', '丑'), '乙丑合法');
+      assert(core.isValidJiazi('癸', '亥'), '癸亥合法');
+
+      suite('3. 藏干与暗合分级验证');
+      assertEqual(MP.data.HIDDEN['辰'].join(''), '戊乙癸', '辰中藏干戊乙癸');
+      assert(MP.data.ANHE_LIST.length >= 25, `暗合生成总数 (${MP.data.ANHE_LIST.length}对)`);
+      const yinChou = MP.data.ANHE_LIST.find(i => (i.b1 === '丑' && i.b2 === '寅') || (i.b1 === '寅' && i.b2 === '丑'));
+      assert(yinChou && yinChou.topLevel === 'A', '寅丑暗合判定为 A 级 (本本合 甲己)');
+
+      suite('4. 综合案例 1 解析 (申子辰三合 + 寅申冲)');
+      const c1 = core.parseChart('甲子 丙寅 戊辰 庚申');
+      assert(c1.valid, '排盘解析成功');
+      assertEqual(c1.dayStem, '戊', '日元戊土');
+      const rels1 = MP.engine.relations.analyzeRelations(c1);
+      assert(rels1.some(r => r.kind === '地支三合局' && r.name.indexOf('申子辰') !== -1), '识别申子辰三合水局');
+      assert(rels1.some(r => r.kind === '地支六冲' && r.name.indexOf('寅申') !== -1), '识别寅申相冲');
+
+      suite('5. 综合案例 2 盲派分析 (丁亥 癸卯 丁酉 甲辰)');
+      const c2 = core.parseChart('丁亥 癸卯 丁酉 甲辰');
+      assert(c2.valid, '排盘解析成功');
+      const rels2 = MP.engine.relations.analyzeRelations(c2);
+      assert(rels2.some(r => r.kind === '干支自合' && r.name.indexOf('丁亥') !== -1), '识别丁亥天地自合');
+      assert(rels2.some(r => r.kind === '天干相冲' && r.name.indexOf('丁癸') !== -1), '识别天干丁癸相冲');
+      assert(rels2.some(r => r.kind === '地支六冲' && r.name.indexOf('卯酉') !== -1), '识别地支卯酉相冲');
+      assert(rels2.some(r => r.kind === '地支六合' && r.name.indexOf('辰酉') !== -1), '识别地支辰酉六合');
+      assert(rels2.some(r => r.kind === '地支六穿' && r.name.indexOf('卯辰') !== -1), '识别盲派卯辰相穿');
+
+      const mp2 = MP.engine.mangpai.analyze(c2, rels2);
+      assert(mp2.gongCandidates.length > 0, `识别做功候选 (${mp2.gongCandidates.length} 条)`);
+
+      suite('6. 大运与流年验证');
+      const luck = MP.engine.luck;
+      assertEqual(luck.getDirection('丁', '男'), '逆', '丁年男命逆排大运');
+      assertEqual(luck.getDirection('丁', '女'), '顺', '丁年女命顺排大运');
+      const dayun = luck.generateDayun(c2, '男', 3);
+      assertEqual(dayun.list[0].jiazi, '壬寅', '癸卯月柱逆排第一步为壬寅');
+      assertEqual(luck.getYearGanzhi(2026), '丙午', '2026年干支为丙午');
+
+      // 汇总
+      const sumDiv = document.getElementById('summary');
+      if (failed === 0) {
+        sumDiv.className = 'summary all-pass';
+        sumDiv.textContent = `全部测试通过！共通过 ${passed} 项断言，0 项失败。`;
+      } else {
+        sumDiv.className = 'summary has-fail';
+        sumDiv.textContent = `测试出现异常：通过 ${passed} 项，失败 ${failed} 项。`;
+      }
+    })();
+  </script>
+</body>
+</html>
